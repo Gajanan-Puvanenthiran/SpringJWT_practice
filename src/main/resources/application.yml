@@ -17,6 +17,11 @@ spring:
 
   application:
     name: SpringJWT
+    security:
+      jwt:
+        secret-key: "8011bc1085283e2d126a00987d76d533ebc1c4d26c924dbb9595314e8c61ad6c"
+        access-token-expiration: 86400000
+        refresh-token-expiration: 604800000
 
 
 

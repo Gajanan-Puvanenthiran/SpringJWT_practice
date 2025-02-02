@@ -14,7 +14,9 @@ select t from Token t inner join User u
 on t.user.id=u.id
 where t.user.id= :userId and t.loggedOut=false
 """)
-    List<Token> findAllTokenByUserId(Integer userId);
+    List<Token> findAllAccessTokenByUserId(Integer userId);
 
-    Optional<Token> findByToken(String token);
+    Optional<Token> findByAccessToken(String token);
+
+    Optional<Token> findByRefreshToken(String token);
 }

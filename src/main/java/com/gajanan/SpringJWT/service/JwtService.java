@@ -6,6 +6,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -18,17 +19,50 @@ public class JwtService {
 
     private final TokenRepository tokenRepository;
 
-    private final String SECRET_KEY= "8011bc1085283e2d126a00987d76d533ebc1c4d26c924dbb9595314e8c61ad6c";
+    @Value("${spring.application.security.jwt.secret-key}")
+    private String secretKey;
+
+    @Value("${spring.application.security.jwt.access-token-expiration}")
+    private long accessTokenExpire;
+
+    @Value("${spring.application.security.jwt.refresh-token-expiration}")
+    private long refreshTokenExpire;
 
     public JwtService(TokenRepository tokenRepository) {
         this.tokenRepository = tokenRepository;
     }
 
-    public String generateToken(User user) {
+    public String generateAccessToken(User user) {
+//        String token= Jwts.builder()
+//                .subject(user.getUserName())
+//                .setIssuedAt(new Date(System.currentTimeMillis()))
+//                .expiration(new Date(System.currentTimeMillis() + 24*60*60*1000))
+//                .signWith(getSigninkey())
+//                .compact();
+//
+//        return token;
+
+        return generateToken(user, accessTokenExpire); // 86400000
+    }
+
+    public String generateRefreshToken(User user) { // refresh token valid for 7 days
+//        String token= Jwts.builder()
+//                .subject(user.getUserName())
+//                .setIssuedAt(new Date(System.currentTimeMillis()))
+//                .expiration(new Date(System.currentTimeMillis() + 7*24*60*60*1000))
+//                .signWith(getSigninkey())
+//                .compact();
+//
+//        return token;
+
+        return generateToken(user, refreshTokenExpire); // 604800000
+    }
+
+    private String generateToken(User user,long expiredTime) {
         String token= Jwts.builder()
                 .subject(user.getUserName())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 24*60*60*1000))
+                .expiration(new Date(System.currentTimeMillis() + expiredTime))
                 .signWith(getSigninkey())
                 .compact();
 
@@ -55,16 +89,16 @@ public class JwtService {
     }
 
     private SecretKey getSigninkey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) {
+    public boolean validateAccessToken(String token, UserDetails userDetails) {
         String username=extractUsername(token);
 
-        boolean isValidToken=tokenRepository.findByToken(token).map(t->!t.isLoggedOut()).orElse(false);
+        boolean isValidAccessToken =tokenRepository.findByAccessToken(token).map(t->!t.isLoggedOut()).orElse(false);
 
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token) && isValidToken);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token) && isValidAccessToken);
     }
 
     private boolean isTokenExpired(String token) {
@@ -73,5 +107,13 @@ public class JwtService {
 
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+
+    public boolean ValidateRefreshToken(String token, User user) {
+        String userName=extractUsername(token);
+
+        boolean isValidRefreshToken=tokenRepository.findByRefreshToken(token).map(t->!t.isLoggedOut()).orElse(false);
+
+        return (userName.equals(user.getUserName()) && !isTokenExpired(token) && isValidRefreshToken);
     }
 }

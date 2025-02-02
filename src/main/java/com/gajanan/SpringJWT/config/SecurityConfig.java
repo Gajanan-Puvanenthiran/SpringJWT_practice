@@ -41,7 +41,7 @@ public class SecurityConfig {
 
         return http.csrf()
                 .disable()
-                .authorizeHttpRequests(req -> req.requestMatchers("/login/**", "/register/**")
+                .authorizeHttpRequests(req -> req.requestMatchers("/login/**", "/register/**","/refresh_token/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated())

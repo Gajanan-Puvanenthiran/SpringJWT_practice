@@ -10,7 +10,8 @@ public class Token {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String token;
+    private String accessToken;
+    private String refreshToken;
 
     private boolean loggedOut;
 
@@ -34,12 +35,12 @@ public class Token {
         this.id = id;
     }
 
-    public String getToken() {
-        return token;
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     public boolean isLoggedOut() {
@@ -48,5 +49,13 @@ public class Token {
 
     public void setLoggedOut(boolean loggedOut) {
         this.loggedOut = loggedOut;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }
